@@ -1,0 +1,12 @@
+- name: CheckClusterStatus
+  shell: "{{ cassandra_path }}/nodetool status | grep 'UN' | wc -l"
+  register: cluster_results
+  retries: 5
+  delay: 60
+  until: cluster_results.stdout|int==3
+- name: GetClusterStatusOutput
+  shell: "{{ cassandra_path }}/nodetool status"
+  register: cluster_status
+- name: DisplayClusterStatusOutput
+  debug: msg="{{ cluster_status.stdout_lines }}"
+  run_once: true

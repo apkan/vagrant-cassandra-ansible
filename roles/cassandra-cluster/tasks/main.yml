@@ -1,0 +1,60 @@
+- name: Check if java 8 alread installed
+  command: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/"//g'
+  register: java_version
+  ignore_errors: True
+- debug:  msg="Java not installed"
+  when: java_version is failed
+- name: installJavaRepo
+  apt_repository: repo='ppa:openjdk-r/ppa'
+  when: java_version is failed
+- name: updateCache
+  apt: update_cache=yes
+  when: java_version is failed
+- name: installJava
+  apt: name=openjdk-8-jdk state=present  
+  when: java_version is failed
+- stat: 
+    path: /opt/apache-cassandra-3.7-bin.tar.gz
+  register: cassandra_source_file
+- name: download the source
+  get_url: 
+    url: https://archive.apache.org/dist/cassandra/3.7/apache-cassandra-3.7-bin.tar.gz
+    dest: /opt/apache-cassandra-3.7-bin.tar.gz
+    mode: 0440
+  when: cassandra_source_file.stat.exists == False
+- stat:
+    path: /opt/apache-cassandra-3.7-bin.tar.gz
+    checksum_algorithm: sha1
+  register: downloaded_file_checksum
+- name: download checksum from apache page
+  uri: url=https://archive.apache.org/dist/cassandra/3.7/apache-cassandra-3.7-bin.tar.gz.sha1 return_content=yes
+  register: apache_page_checksum
+  failed_when: downloaded_file_checksum.stat.checksum != apache_page_checksum.content
+- name: Create home directory
+  file: 
+    path: "{{ cassandra_home }}"
+    state: directory
+    mode: 0755  
+- name: Extract cassandra source
+  unarchive:
+    src: /opt/apache-cassandra-3.7-bin.tar.gz
+    dest: "{{ cassandra_home }}"
+    extra_opts: [--strip-components=1]
+    remote_src: yes  
+- name: Export path
+  shell: "echo 'PATH=$PATH:{{ cassandra_path }}' > /etc/profile.d/custom-path.sh && . /etc/profile.d/custom-path.sh"
+- name: install the configuration file
+  template: src=cassandra.yaml.j2 dest='{{ cassandra_home }}/conf/cassandra.yaml' mode=750
+- name: copy the startup script
+  template: src=cassandra.sh dest=/etc/init.d/cassandra owner=root group=root mode=755
+- name: Enable the daemon
+  shell: update-rc.d cassandra "{{ item }}"
+  with_items:
+    - "defaults"
+    - "enable"
+- name: start cassandra service
+  service: name=cassandra state=started
+  notify:
+  - CheckClusterStatus
+  - GetClusterStatusOutput
+  - DisplayClusterStatusOutput
