@@ -59,7 +59,7 @@
   template: src=cassandra.yaml.j2 dest='{{ cassandra_home }}/conf/cassandra.yaml' mode=750
   
 - name: copy the startup script
-  template: src=cassandra.yaml.j2 dest=/usr/lib/systemd/system/cassandra.service owner=root group=root mode=755
+  template: src=cassandra.service.j2 dest=/lib/systemd/system/cassandra.service owner=root group=root mode=755
   
 # - name: Enable the daemon
 #   shell: update-rc.d cassandra "{{ item }}"
@@ -71,6 +71,7 @@
   ansible.builtin.systemd:
      name=cassandra 
      state=started
+     daemon_reload=true
   notify:
   - CheckClusterStatus
   - GetClusterStatusOutput

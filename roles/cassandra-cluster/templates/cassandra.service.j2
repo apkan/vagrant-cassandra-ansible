@@ -9,11 +9,9 @@ RuntimeDirectory=cassandra
 PIDFile=/opt/cassandra/cassandra.pid
 Environment=CASSANDRA_HOME=/opt/cassandra/
 Environment=CASSANDRA_CONF=/opt/cassandra/conf
-Environment=CASSANDRA_INCLUDE=/usr/share/cassandra/cassandra.in.sh
-Environment=CASSANDRA_OWNR=root
 User=root
 Type=forking
-ExecStart=/opt/cassandra/cassandra -p /opt/cassandra/cassandra.pid
+ExecStart=/opt/cassandra/bin/cassandra -p /opt/cassandra/cassandra.pid -R
 StandardOutput=journal
 StandardError=journal
 LimitNOFILE=100000
