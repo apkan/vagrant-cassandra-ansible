@@ -60,12 +60,6 @@
   
 - name: copy the startup script
   template: src=cassandra.service.j2 dest=/lib/systemd/system/cassandra.service owner=root group=root mode=755
-  
-# - name: Enable the daemon
-#   shell: update-rc.d cassandra "{{ item }}"
-#   with_items:
-#     - "defaults"
-#     - "enable"
     
 - name: start cassandra service
   ansible.builtin.systemd:
