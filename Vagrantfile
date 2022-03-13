@@ -5,7 +5,7 @@ inventory = YAML.load_file("my_inventory.yml")
 
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/bionic64"
   
   config.vm.synced_folder ".", "/vagrant", mount_options: ["dmode=775,fmode=600"]
 
@@ -31,6 +31,27 @@ Vagrant.configure("2") do |config|
   
   config.vm.define "node3" do |machine|
     machine.vm.network "private_network", ip: inventory["all"]["hosts"]["node3"]["ansible_ssh_host"]
+	machine.vm.provider "virtualbox" do |vbox|
+		vbox.memory = "1024"
+		vbox.cpus = "1"
+		vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+		vbox.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+	end
+  end
+
+  config.vm.define "node4" do |machine|
+    machine.vm.network "private_network", ip: inventory["all"]["hosts"]["node4"]["ansible_ssh_host"]
+	machine.vm.provider "virtualbox" do |vbox|
+		vbox.memory = "1024"
+		vbox.cpus = "1"
+		vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+		vbox.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+	end
+  end
+
+  
+  config.vm.define "node5" do |machine|
+    machine.vm.network "private_network", ip: inventory["all"]["hosts"]["node5"]["ansible_ssh_host"]
 	machine.vm.provider "virtualbox" do |vbox|
 		vbox.memory = "1024"
 		vbox.cpus = "1"

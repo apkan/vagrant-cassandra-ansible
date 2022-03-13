@@ -3,7 +3,7 @@
   register: cluster_results
   retries: 5
   delay: 60
-  until: cluster_results.stdout|int==3
+  until: cluster_results.stdout|int==5
 - name: GetClusterStatusOutput
   shell: "{{ cassandra_path }}/nodetool status"
   register: cluster_status
